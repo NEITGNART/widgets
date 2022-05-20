@@ -6,10 +6,6 @@ const Search = () => {
     const [term, setTerm] = useState('programming');
     const [results, setResults] = useState([]);
 
-    console.log(results)
-
-    console.log('I RUN EVERY RENDER');
-
     useEffect(
         () => {
             const search = async () => {
@@ -22,28 +18,36 @@ const Search = () => {
                         srsearch: term
                     }
                 });
-
-                setResults(data);
+                setResults(data.query.search);
             }
+            const timeoutId = setTimeout(() => {
+                if (term)
+                    search().then(er => {
+                        console.log(er)
+                    })
+            }, 500)
 
-            if (term) {
-                search()
+            return () => {
+                    clearTimeout(timeoutId);
             }
-
         }, [term]
     )
 
+    // dangerouslySetInnerHTML  => hacker my inject js in this cript
     const renderedResults = results.map((result) => {
         return (
-            <div className="item">
+            <div key={result.pageid} className="item">
+                <div className="right floated content">
+                    <a href={`https://en.wikipedia.org?curid=${result.pageid}`} className="ui button">Go</a>
+                </div>
                 <div className="content">
-                    <div className="header">
-
-                    </div>
+                    <div className="header">{result.title}</div>
+                    <span dangerouslySetInnerHTML={{__html: result.snippet}}></span>
                 </div>
             </div>
         );
-    })
+    });
+    ;
 
     return (
         <div>
@@ -57,6 +61,9 @@ const Search = () => {
                             setTerm(e.target.value)
                         }}
                         type="text"/>
+                </div>
+                <div className="ui celled list">
+                    {renderedResults}
                 </div>
             </div>
         </div>
